@@ -189,17 +189,18 @@ temp_df=temp_df.drop(['THE TRAVEL AGENCY IN THE PARK'],axis=0)
 temp_df.info()
 
 
-# In[25]:
+# In[26]:
 
 
 #converting back to dict
 
 data_dict= temp_df.to_dict('index')
 features_list=list(temp_df.columns.values)
-features_list
+old_features=list(temp_df.columns.values)
+print old_features
 
 
-# In[26]:
+# In[27]:
 
 
 # Reference module from feature selection: Used for creating new features "fraction_to_poi" and "fraction_from_poi"
@@ -217,7 +218,7 @@ def computeFraction( poi_messages, all_messages ):
         return fraction
 
 
-# In[27]:
+# In[28]:
 
 
 # Used for creating new features "total_profit"
@@ -228,7 +229,7 @@ def total_profit(bonus, salary,long_term_incentive):
     
 
 
-# In[28]:
+# In[29]:
 
 
 submit_dict = {}
@@ -261,7 +262,7 @@ for name in data_dict:
     data_dict[name]["total_profit"]=profit
 
 
-# In[29]:
+# In[30]:
 
 
 #added two additional features in data_dict
@@ -269,33 +270,45 @@ total_features=len (data_dict[name_data_point[0]])
 print 'After cleaning Total number of features are {}'.format(total_features)
 
 
-# In[30]:
+# In[31]:
 
 
 print 'After cleaning number of data points {}'.format(len(data_dict))
 
 
-# In[31]:
+# In[32]:
 
 
 dict_cols=list(data_dict[name_data_point[0]].keys())
 
 
-# In[32]:
+# In[33]:
 
 
 my_dataset = data_dict
 for names in dict_cols:
     if names not in features_list:
-        print names
+        
         features_list.append(names)
-
 features_list
+
+
+# In[34]:
+
+
+print old_features
 
 
 # ## SVC Classifier with PCA and MinMaX Scalar
 
-# In[178]:
+# In[36]:
+
+
+print features_list
+print old_features
+
+
+# In[37]:
 
 
 #With all features
@@ -309,7 +322,16 @@ from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 
 
-# In[179]:
+# In[38]:
+
+
+# without engineered features
+data_old = featureFormat(my_dataset, old_features, sort_keys = True)
+labels_old, features_old = targetFeatureSplit(data_old)
+features_train_old, features_test_old, labels_train_old, labels_test_old =train_test_split(features_old, labels_old, test_size=0.3, random_state=42)
+
+
+# In[39]:
 
 
 data = featureFormat(my_dataset, features_list, sort_keys = True)
@@ -317,7 +339,7 @@ labels, features = targetFeatureSplit(data)
 features_train, features_test, labels_train, labels_test =train_test_split(features, labels, test_size=0.3, random_state=42)
 
 
-# In[180]:
+# In[40]:
 
 
 from sklearn.svm import SVC
@@ -332,7 +354,7 @@ param_grid_svc={'C': [1e3, 5e3, 1e4, 5e4, 1e5], 'gamma': [0.0001, 0.0005, 0.001,
 grid=GridSearchCV(clf_svc,param_grid_svc,cv=ss, scoring = 'f1')
 
 
-# In[181]:
+# In[41]:
 
 
 t0=time()
@@ -340,13 +362,13 @@ grid.fit(features_train,labels_train)
 print "Training time for regular SVC with default parameters is %0.3fs" % (time() - t0)
 
 
-# In[182]:
+# In[42]:
 
 
 grid.best_estimator_
 
 
-# In[183]:
+# In[43]:
 
 
 y_pred=grid.predict(features_test)
@@ -360,7 +382,7 @@ print "--------The f1-score of SVC classifer------: "
 print f1_score(labels_test,y_pred)
 
 
-# In[187]:
+# In[44]:
 
 
 #Regular SVC without default parameters
@@ -378,7 +400,7 @@ X_train_pca_scaler=pca.transform(X_train_scaler)
 X_test_pca_scaler=pca.transform(X_test_scaler)
 
 
-# In[188]:
+# In[45]:
 
 
 t0=time()
@@ -386,13 +408,13 @@ grid.fit(X_train_pca,labels_train)
 print "Training time for regular SVC with PCA is %0.3fs" % (time() - t0)
 
 
-# In[190]:
+# In[46]:
 
 
 grid.best_estimator_
 
 
-# In[126]:
+# In[47]:
 
 
 y_pred=grid.predict(X_test_pca)
@@ -404,7 +426,7 @@ print "--------The f1-score of SVC classifer with PCA------: "
 print f1_score(labels_test,y_pred)
 
 
-# In[127]:
+# In[48]:
 
 
 t0=time()
@@ -412,7 +434,7 @@ grid.fit(X_train_scaler,labels_train)
 print "Training time for regular SVC with scaler is %0.3fs" % (time() - t0)
 
 
-# In[128]:
+# In[49]:
 
 
 y_pred=grid.predict(X_test_scaler)
@@ -426,7 +448,7 @@ print f1_score(labels_test,y_pred)
 
 # ## Naive Bayes Gaussian
 
-# In[129]:
+# In[50]:
 
 
 from sklearn.naive_bayes import GaussianNB
@@ -436,7 +458,7 @@ clf_gnb=GaussianNB()
 skb=SelectKBest()
 
 
-# In[130]:
+# In[51]:
 
 
 from sklearn.pipeline import Pipeline
@@ -445,14 +467,14 @@ pipe_2=Pipeline([('SKB',skb),('GNB', clf_gnb)])
 pipe_2.get_params().keys()
 
 
-# In[131]:
+# In[52]:
 
 
 param_grid={"SKB__k":[2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]}
 clf_grid_gnb=GridSearchCV(pipe_2,param_grid,cv=ss, scoring = 'f1')
 
 
-# In[132]:
+# In[53]:
 
 
 t0=time()
@@ -460,13 +482,19 @@ clf_grid_gnb.fit(features,labels)
 print "training done for GNB in %0.3fs" % (time() - t0)
 
 
-# In[133]:
+# In[54]:
+
+
+features_list
+
+
+# In[55]:
 
 
 clf_grid_gnb.best_estimator_
 
 
-# In[134]:
+# In[56]:
 
 
 clf=clf_grid_gnb.best_estimator_
@@ -474,7 +502,7 @@ clf.fit(features_train,labels_train)
 y_pred=clf.predict(features_test)
 
 
-# In[135]:
+# In[57]:
 
 
 from sklearn.metrics import classification_report
@@ -486,7 +514,7 @@ print(pd.DataFrame(confusion_matrix(labels_test, y_pred),
                  columns=['pred_neg', 'pred_pos'], index=['neg', 'pos']))
 
 
-# In[136]:
+# In[58]:
 
 
 print "---------Accuracy of GNB------------"
@@ -504,7 +532,7 @@ print f1_score(labels_test,y_pred)
 
 # ## Adaboost
 
-# In[156]:
+# In[59]:
 
 
 from sklearn.ensemble import AdaBoostClassifier
@@ -513,7 +541,7 @@ pipe_ada=Pipeline([('SKB',skb),('ADA', clf_ada)])
 pipe_ada.get_params().keys()
 
 
-# In[157]:
+# In[60]:
 
 
 param_grid={"SKB__k":[2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],'ADA__algorithm':['SAMME','SAMME.R'] }
@@ -522,7 +550,7 @@ clf_grid_ada=GridSearchCV(pipe_ada,param_grid,cv=ss, scoring = 'f1')
 clf_grid_ada.fit(features,labels)
 
 
-# In[159]:
+# In[61]:
 
 
 clf_ada=clf_grid_ada.best_estimator_
@@ -531,7 +559,7 @@ clf_ada.fit(features_train,labels_train)
 y_pred=clf_ada.predict(features_test)
 
 
-# In[160]:
+# In[62]:
 
 
 print "CLASSIFICATION REPORT for Trees"
@@ -541,7 +569,7 @@ print(pd.DataFrame(confusion_matrix(labels_test, y_pred),
                  columns=['pred_neg', 'pred_pos'], index=['neg', 'pos']))
 
 
-# In[161]:
+# In[63]:
 
 
 print "---------Accuracy of ADABOOST------------"
@@ -559,7 +587,7 @@ print f1_score(labels_test,y_pred)
 
 # ## Decision Trees
 
-# In[191]:
+# In[64]:
 
 
 from sklearn.tree import DecisionTreeClassifier
@@ -569,13 +597,13 @@ clf_tree.fit(features_train,labels_train)
 print "DT training done for regular tree in %0.3fs" % (time() - t0)
 
 
-# In[192]:
+# In[65]:
 
 
 y_pred=clf_tree.predict(features_test)
 
 
-# In[193]:
+# In[66]:
 
 
 print "CLASSIFICATION REPORT"
@@ -585,7 +613,7 @@ print(pd.DataFrame(confusion_matrix(labels_test, y_pred),
                  columns=['pred_neg', 'pred_pos'], index=['neg', 'pos']))
 
 
-# In[194]:
+# In[67]:
 
 
 print "---------Accuracy of Decision Tree Default------------"
@@ -601,21 +629,21 @@ print "--------The f1-score of Decision Tree Default------: "
 print f1_score(labels_test,y_pred)
 
 
-# In[165]:
+# In[68]:
 
 
 pipe_tree=Pipeline([('SKB',skb),('tree', clf_tree)])
 pipe_tree.get_params().keys()
 
 
-# In[166]:
+# In[69]:
 
 
 param_grid={"SKB__k":[2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],'tree__criterion':['entropy'],'tree__min_samples_split':[2,5,7,10,12,15],'tree__max_depth':[1,2,3,4,5]}
 clf_grid_tree=GridSearchCV(pipe_tree,param_grid,cv=ss, scoring = 'f1')
 
 
-# In[167]:
+# In[70]:
 
 
 t0=time()
@@ -623,13 +651,13 @@ clf_grid_tree.fit(features,labels)
 print "training done for Tree in pipeline in %0.3fs" % (time() - t0)
 
 
-# In[168]:
+# In[71]:
 
 
 clf_grid_tree.best_estimator_
 
 
-# In[173]:
+# In[72]:
 
 
 clf_tree=clf_grid_tree.best_estimator_
@@ -637,29 +665,80 @@ clf_tree.fit(features_train,labels_train)
 y_pred=clf_tree.predict(features_test)
 
 
-# In[174]:
+# In[73]:
 
 
-print "CLASSIFICATION REPORT for Trees"
+print "CLASSIFICATION REPORT for Trees With New Features"
 print classification_report(labels_test, y_pred)
-print "CONFUSION MATRIX for Trees"
+print "CONFUSION MATRIX for Trees With New Features"
 print(pd.DataFrame(confusion_matrix(labels_test, y_pred),
                  columns=['pred_neg', 'pred_pos'], index=['neg', 'pos']))
 
 
-# In[175]:
+# In[74]:
 
 
-print "---------Accuracy of Decision Tree------------"
+print "---------Accuracy of Decision Tree With New Features------------"
 print accuracy_score(labels_test, y_pred)
 print "\n"
-print "-------------Precision of Decision Tree ----------- "
+print "-------------Precision of Decision Tree With New Features ----------- "
 print precision_score(labels_test,y_pred)
 print "\n"
-print "----------Recall of  Decision Tree -----------    "
+print "----------Recall of  Decision Tree With New Features -----------    "
 print recall_score(labels_test,y_pred)
 print "\n"
-print "--------The f1-score of Decision Tree------: "
+print "--------The f1-score of Decision Tree With New Features------: "
+print f1_score(labels_test,y_pred)
+
+
+# In[76]:
+
+
+# Impact of Engineered features
+param_grid_old={"SKB__k":[2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19],'tree__criterion':['entropy'],'tree__min_samples_split':[2,5,7,10,12,15],'tree__max_depth':[1,2,3,4,5]}
+clf_grid_tree=GridSearchCV(pipe_tree,param_grid_old,cv=ss, scoring = 'f1')
+t0=time()
+clf_grid_tree.fit(features_old,labels_old)
+print "training done for Tree in pipeline without new features in %0.3fs" % (time() - t0)
+
+
+# In[77]:
+
+
+clf_grid_tree.best_estimator_
+
+
+# In[78]:
+
+
+clf_tree_old=clf_grid_tree.best_estimator_
+clf_tree_old.fit(features_train_old,labels_train_old)
+y_pred=clf_tree_old.predict(features_test_old)
+
+
+# In[79]:
+
+
+print "CLASSIFICATION REPORT for Trees without New features"
+print classification_report(labels_test, y_pred)
+print "CONFUSION MATRIX for Trees without New features"
+print(pd.DataFrame(confusion_matrix(labels_test, y_pred),
+                 columns=['pred_neg', 'pred_pos'], index=['neg', 'pos']))
+
+
+# In[80]:
+
+
+print "---------Accuracy of Decision Tree without new features------------"
+print accuracy_score(labels_test, y_pred)
+print "\n"
+print "-------------Precision of Decision Tree without new features ----------- "
+print precision_score(labels_test,y_pred)
+print "\n"
+print "----------Recall of  Decision Tree without new features -----------    "
+print recall_score(labels_test,y_pred)
+print "\n"
+print "--------The f1-score of Decision Tree without new features------: "
 print f1_score(labels_test,y_pred)
 
 
@@ -667,10 +746,4 @@ print f1_score(labels_test,y_pred)
 
 
 dump_classifier_and_data(clf_tree, my_dataset, features_list)
-
-
-# In[ ]:
-
-
-
 
