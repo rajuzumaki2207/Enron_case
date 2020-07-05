@@ -1,6 +1,9 @@
 # Enron_case
 Udacity Nano Degree: Introduction to Machine Learning
 tester.py is modified becuase of renaming and deprecation of cross_validation sub-module to model_selection
+Pandas Module Version: 0.24.2
+SKLEARN module Version:0.20.3
+
 
 Files and description
 poi_id.py : The main python script.
