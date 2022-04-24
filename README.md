@@ -1,16 +1,20 @@
-# Enron_case
-Udacity Nano Degree: Introduction to Machine Learning
-tester.py is modified becuase of renaming and deprecation of cross_validation sub-module to model_selection
-Pandas Module Version: 0.24.2
-SKLEARN module Version:0.20.3
+# Enron_case 
+For detail report - Please read the report here  [report.pdf](https://github.com/rajuzumaki2207/Enron_case/blob/master/Enron_poi_indentifier_report.pdf)
+## Introduction
+The story of Enron Corporation depicts a company that reached dramatic heights only to face a dizzying fall. The fated company's collapse affected thousands of employees and shook wall street to its core. At Enron's peak, its shares were worth $90.75, just prior to declaring bankruptcy on Dec 2, 2001, they were trading at $0.26. By 2022, it had collapsed into bankruptcy due to widespread corporate fraud. In the resulting federal investigation , a significant amount of typically confidential information entered into the public record including tens of thousands of emails and detailed financial data for top executives.
+
+### Data Exploration
+In this project I played the detective and put my machine learning skills to use by building a classifier algorithm to identify Enron employees who may have committed fraud based on the public Enron Financial and email data. Where such a large surplus of data are available, simple machine learning codes can help in narrowing in identifying the culprit and can fasten the investigation process.
+Data was imported in a form of nested dictionary , it was difficult to do any kind of cleaning without iterating through all the elements in the nested dictionary. The dataset can be divided into two broad categories a. Financial Data  b. Email data
 
 
-Files and description
-poi_id.py : The main python script.
-my_features_list.pkl : Pickle file generated after running poi_id.py and contains the features used by the classifier.
-my_dataset.pkl : Pickle file generated after running poi_id.py and contains the complete dataset with newly created features as well.
-my_classifier.pkl : Pickle file generated after running poi_id.py and contains the trained classifier.
-Enron_poi_indentifier_report.pdf: Response/answers to the questions as part of this project submission.
-tester.py : This python script is provided by Udacity to check the performace of poi_id.py script.
-final_project_dataset.pkl : This is the Enron dataset provided by Udacity for this project.
-poi_jupyter_nb.ipynb : The intermediate python NB used to perform all actions before final script submission.
+### 
+
+1. The dataset available has in total 146 data points. The data is in the form of a dictionary with the keys corresponding to each person. Out of which the 18 people are identified POI ['HANNON KEVIN P', 'COLWELL WESLEY', 'RIEKER PAULA H', 'KOPPER MICHAEL J', 'SHELBY REX', 'DELAINEY DAVID W', 'LAY KENNETH L', 'BOWEN JR RAYMOND M', 'BELDEN TIMOTHY N', 'FASTOW ANDREW S', 'CALGER CHRISTOPHER F', 'RICE KENNETH D', 'SKILLING JEFFREY K', 'YEAGER F SCOTT', 'HIRKO JOSEPH', 'KOENIG MARK E', 'CAUSEY RICHARD A', 'GLISAN JR BEN F'] There were a few outliers in the data, one was the data set named 'TOTAL' which was the sum of all the data points and needed to be removed. A few outliers were identified on the basis of lack of information available about them.
+2. The features which I ended up using are: ['poi', 'salary', 'to_messages', 'total_payments', 'exercised_stock_options', 'bonus', restricted_stock', 'shared_receipt_with_poi', 'expenses', 'from_messages', 'other', 'long_term_incentive'] The total number of available features were 21, out of which 14 were financial features, 6 were e-mail features and one was the 'poi' flag. A 'poi' or person of interest is a person highly likely to be guilty for the enron fraud case. three new features 'fraction_to_poi' : the ratio of number of direct mails to poi from this person to the number of total outgoing mails,  'fraction_from_poi' : the ratio of direct mails from poi to this person  to the number of total incoming mails and "total_profit" : sum of salaries and incentives.An automated feature selection function SelectKBest was used using GridSearchCV to find the optimum number of features required which came out to be 13 before introduction of new features and 19 after introduction of new features. The F1 score improved from .37 to .72 on introduction of new features.The features were selected on the basis of importance criterion using the .feature_importances_ command to list down the features.The features were arranged and then the k_best features were selected.I used the MinMaxScaler() using the Pipeline along with the classifier. Scaling is used to take care of the effect of ranges of different features and to bring them down to the same scale.
+
+3. I ended up using the DecisionTreeClassifier. I compared the performace of 4 classifiers naming SVM, Naive Bayes, Dicision Tree and AdaBoost. I tried to work with the DecisionTreeClassifier along with GridSearchCV to tune the 'criterion', 'max_depth' and 'max_features', it gave good precision and recall. My focus was selecting classifier that had better recall as POI to NON POI ratio were really skewed, and I wanted to minimize false negative. (Detail comparison with various scaling and dimensionaloity reduction techniques are explained in the report [report.pdf](https://github.com/rajuzumaki2207/Enron_case/blob/master/Enron_poi_indentifier_report.pdf)).
+
+4. In machine learning, model validation is referred to as the process where a trained model is evaluated with a testing data set. The testing data set is a separate portion of the same data set from which the training set is derived. The mistake we can make is overfitting to the training data, which would give us very good accuracy for that set of data but if we test it on different data the accuracy may deteriorate. The validation was done by splitting our data into sets of training data and testing data using StratifiedShuffleSplit. StratifiedShuffleSplit is useful here because the number of values belonging to each class are unbalanced. With this we ensure that that training and test sets have the same class proportions as the whole dataset. It helps to predict the class with fewer number of points in our case the poi label with better performance.
+
+5. Two of the evaluation metrics are: Precision - It is the value for (Ture positive)/(True Positive + False Positive), Good precision would imply whenever any person is flagged poi, we have high confidence he is real poi but it may skip detecting some person who is actually a poi. Recall - It is the value for (Ture positive)/(True Positive + False negative), Good recall would imply we will find most poi's but also there may be a lot of false positives.
